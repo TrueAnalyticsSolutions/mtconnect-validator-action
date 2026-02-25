@@ -1,0 +1,36 @@
+name: 'MTConnect Validator'
+description: 'Upload MTConnect XML files from a repository to the MTConnect Validator API'
+author: 'MTConnect Validator'
+branding:
+  icon: 'check-circle'
+  color: 'blue'
+
+inputs:
+  api-endpoint:
+    description: 'Validation API endpoint URL'
+    required: false
+    default: 'https://validator.tams.ai/api/validation/validate'
+  api-key:
+    description: 'API key for the validator service (recommend storing in secrets.MTC_VALIDATOR_API_KEY)'
+    required: false
+  file-regex:
+    description: 'Regex used to match repository files when files input is not provided'
+    required: false
+    default: '(^|/)Devices\\.xml$'
+  files:
+    description: 'Explicit file list to validate. Accepts JSON array, newline-separated, or comma-separated values.'
+    required: false
+
+outputs:
+  validated-count:
+    description: 'Count of files that returned successful validation responses (2xx)'
+  failed-count:
+    description: 'Count of files that failed to upload or validate'
+  success:
+    description: 'True when all selected files validated successfully'
+  results-json:
+    description: 'JSON array containing upload result details for each file'
+
+runs:
+  using: 'node20'
+  main: 'dist/index.js'
