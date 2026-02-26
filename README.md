@@ -61,7 +61,7 @@ jobs:
       - name: Validate MTConnect files
         id: mtc
         continue-on-error: true
-        uses: TrueAnalyticsSolutions/validator-mtconnect-action@v1
+        uses: TrueAnalyticsSolutions/validator-mtconnect-action@v2
         with:
           api-endpoint: https://validator.tams.ai/api/validation/validate
           api-key: ${{ secrets.MTC_VALIDATOR_API_KEY }}
