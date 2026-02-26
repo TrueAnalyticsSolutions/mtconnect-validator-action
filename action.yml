@@ -26,10 +26,14 @@ outputs:
     description: 'Count of files that returned successful validation responses (2xx)'
   failed-count:
     description: 'Count of files that failed to upload or validate'
+  non-compliant-count:
+    description: 'Count of files that uploaded successfully but contain validation errors'
+  compliant-count:
+    description: 'Count of files that uploaded successfully and are compliant'
   success:
-    description: 'True when all selected files validated successfully'
+    description: 'True when every selected file uploaded successfully and is compliant'
   results-json:
-    description: 'JSON array containing upload result details for each file'
+    description: 'JSON array containing upload and compliance details for each file'
 
 runs:
   using: 'node20'

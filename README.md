@@ -11,7 +11,7 @@ It is intended to be copied into a separate public repository and published as y
   - a regex (`file-regex`) used to discover files from the repository workspace.
 - Uploads each file to the validator API endpoint as `multipart/form-data`.
 - Includes optional API key authentication via `X-API-KEY` header.
-- Returns success/failure counts and a machine-readable JSON result payload.
+- Returns upload/compliance counts and a machine-readable JSON result payload.
 
 ## Prerequisites
 
@@ -36,8 +36,10 @@ It is intended to be copied into a separate public repository and published as y
 |---|---|
 | `validated-count` | Number of files with successful (HTTP 2xx) validation responses. |
 | `failed-count` | Number of files that failed upload or returned non-2xx responses. |
-| `success` | `true` when all files succeeded, otherwise `false`. |
-| `results-json` | JSON array with per-file status/body information from the API call(s). |
+| `non-compliant-count` | Number of successfully uploaded files that were still non-compliant (`ErrorCount > 0` and/or `IsValid = false`). |
+| `compliant-count` | Number of successfully uploaded files that are compliant. |
+| `success` | `true` only when every file both uploads successfully and is compliant. |
+| `results-json` | JSON array with per-file status/body plus compliance fields (`compliant`, `validationErrorCount`, etc.). |
 
 ## Example workflow
 
@@ -58,18 +60,33 @@ jobs:
 
       - name: Validate MTConnect files
         id: mtc
-        uses: TrueAnalyticsSolutions/mtconnect-validator-action@v1
+        continue-on-error: true
+        uses: TrueAnalyticsSolutions/validator-mtconnect-action@v1
         with:
           api-endpoint: https://validator.tams.ai/api/validation/validate
           api-key: ${{ secrets.MTC_VALIDATOR_API_KEY }}
-          file-regex: '(^|/)Devices\\.xml$'
+          file-regex: '(^|/)Devices\.xml$'
 
       - name: Print results
         run: |
           echo "validated: ${{ steps.mtc.outputs.validated-count }}"
           echo "failed: ${{ steps.mtc.outputs.failed-count }}"
+          echo "non-compliant: ${{ steps.mtc.outputs.non-compliant-count }}"
+          echo "compliant: ${{ steps.mtc.outputs.compliant-count }}"
           echo "success: ${{ steps.mtc.outputs.success }}"
           echo '${{ steps.mtc.outputs.results-json }}'
+
+      - name: Fail workflow when any document is non-compliant
+        env:
+          RESULTS_JSON: ${{ steps.mtc.outputs.results-json }}
+        run: |
+          failed_uploads=$(echo "$RESULTS_JSON" | jq '[.[] | select(.ok != true)] | length')
+          non_compliant=$(echo "$RESULTS_JSON" | jq '[.[] | select(.ok == true and .compliant != true)] | length')
+
+          if [ "$failed_uploads" -gt 0 ] || [ "$non_compliant" -gt 0 ]; then
+            echo "Validation failed ($failed_uploads upload/API failure(s), $non_compliant non-compliant file(s))."
+            exit 1
+          fi
 ```
 
 ## Local build
@@ -80,3 +97,5 @@ npm run build
 ```
 
 This compiles `src/index.js` into `dist/index.js` using webpack.
+
+The action now sends CI metadata (`Author` + structured `Notes`) with each upload so Enterprise CI Bulk Validation views can trace repository, run, and file context.
