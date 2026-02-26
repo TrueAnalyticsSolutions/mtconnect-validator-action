@@ -36,7 +36,7 @@ It is intended to be copied into a separate public repository and published as y
 |---|---|
 | `validated-count` | Number of files with successful (HTTP 2xx) validation responses. |
 | `failed-count` | Number of files that failed upload or returned non-2xx responses. |
-| `non-compliant-count` | Number of successfully uploaded files that were still non-compliant (`ErrorCount > 0` and/or `IsValid = false`). |
+| `non-compliant-count` | Number of successfully uploaded files that were still non-compliant (`isValid`/`IsValid` is not `true` for at least one returned validation record). |
 | `compliant-count` | Number of successfully uploaded files that are compliant. |
 | `success` | `true` only when every file both uploads successfully and is compliant. |
 | `results-json` | JSON array with per-file status/body plus compliance fields (`compliant`, `validationErrorCount`, etc.). |
@@ -61,7 +61,7 @@ jobs:
       - name: Validate MTConnect files
         id: mtc
         continue-on-error: true
-        uses: TrueAnalyticsSolutions/validator-mtconnect-action@v2
+        uses: TrueAnalyticsSolutions/mtconnect-validator-action@v3
         with:
           api-endpoint: https://validator.tams.ai/api/validation/validate
           api-key: ${{ secrets.MTC_VALIDATOR_API_KEY }}

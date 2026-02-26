@@ -47,7 +47,7 @@ function summarizeValidationBody(body) {
 
   const validationErrorCount = body.reduce((sum, item) => sum + Number(item?.ErrorCount || 0), 0);
   const validationWarningCount = body.reduce((sum, item) => sum + Number(item?.WarningCount || 0), 0);
-  const compliant = body.every((item) => (item?.IsValid === true) || Number(item?.ErrorCount || 0) === 0);
+  const compliant = body.every((item) => item?.IsValid === true || item?.isValid === true);
 
   return {
     compliant,
