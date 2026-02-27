@@ -25,8 +25,8 @@ function buildValidationMeta(filePath) {
     run_attempt: process.env.GITHUB_RUN_ATTEMPT,
     run_url: runUrl,
     job: process.env.GITHUB_JOB,
-    workspaceKey: repo && runId ? `${repo}:${runId}` : undefined,
-    trackKey: repo && runId ? `${repo}:${runId}` : undefined
+    workspaceKey: repo && filePath ? `${repo}:${filePath}` : undefined,
+    trackKey: repo && filePath ? `${repo}:${filePath}` : undefined
   };
 
   return {
